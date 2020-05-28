@@ -32,7 +32,7 @@ def pytest_collect_file(path, parent):
             and
         "data" not in path.dirname
     ):
-        return TutorialFile(path, parent)
+        return TutorialFile.from_parent(parent=parent, fspath=path)
 
 def pytest_pycollect_makemodule(path, parent):
     """
@@ -43,7 +43,7 @@ def pytest_pycollect_makemodule(path, parent):
             and
         "data" not in path.dirname
     ):
-        return DoNothingFile(path, parent)
+        return DoNothingFile.from_parent(parent=parent, fspath=path)
 
 class TutorialFile(pytest.File):
     """
@@ -51,7 +51,7 @@ class TutorialFile(pytest.File):
     """
 
     def collect(self):
-        yield TutorialItem("run_tutorial -> " + os.path.relpath(str(self.fspath), str(self.parent.fspath)), self)
+        yield TutorialItem.from_parent(parent=self, name="run_tutorial -> " + os.path.relpath(str(self.fspath), str(self.parent.fspath)))
 
 class TutorialItem(pytest.Item):
     """
