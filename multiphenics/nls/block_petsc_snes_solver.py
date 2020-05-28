@@ -22,7 +22,7 @@ class BlockPETScSNESSolver(PETScSNESSolver):
     def __init__(self, problem):
         PETScSNESSolver.__init__(self)
         self.problem = problem
-    
+
     def solve(self):
         PETScSNESSolver.solve(self, self.problem, self.problem.block_solution.block_vector())
         # Keep subfunctions up to date

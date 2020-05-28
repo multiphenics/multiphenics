@@ -32,10 +32,10 @@ def preserve_bcs_zero_off_block_diagonal__first_arg_matrix_second_arg_number(ope
             output._bcs_zero_off_block_diagonal = self._bcs_zero_off_block_diagonal
         return output
     setattr(BlockPETScMatrix, operator, custom_operator)
-    
+
 for operator in ("__mul__", "__rmul__", "__imul__", "__truediv__", "__itruediv__"):
     preserve_bcs_zero_off_block_diagonal__first_arg_matrix_second_arg_number(operator)
-    
+
 def preserve_bcs_zero_off_block_diagonal__first_and_second_args_matrices(operator):
     original_operator = getattr(BlockPETScMatrix, operator)
     def custom_operator(self, other):
@@ -51,6 +51,6 @@ def preserve_bcs_zero_off_block_diagonal__first_and_second_args_matrices(operato
         output._bcs_zero_off_block_diagonal = bcs_zero_off_block_diagonal.tolist()
         return output
     setattr(BlockPETScMatrix, operator, custom_operator)
-    
+
 for operator in ("__add__", "__iadd__", "__sub__", "__isub__"):
     preserve_bcs_zero_off_block_diagonal__first_and_second_args_matrices(operator)

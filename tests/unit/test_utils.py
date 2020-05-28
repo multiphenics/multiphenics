@@ -62,27 +62,27 @@ def array_equal(array1, array2):
 # This function is required because ordering of dofs is different between dolfin and block libraries
 def array_sorted_equal(array1, array2):
     return array_equal(sort(array1), sort(array2))
-    
+
 # This function is required because ordering of dofs is different between dolfin and block libraries,
 # and because unique elements must be extracted when comparing tensors on subdomains.
 def array_unique_equal(array1, array2):
     return array_equal(unique(array1), unique(array2))
-    
+
 # ================ EQUALITY BETWEEN DOFS ================ #
 def assert_owned_local_dofs(owned_local_dofs, block_owned_local_dofs):
     assert array_sorted_equal(owned_local_dofs, block_owned_local_dofs)
-    
+
 def assert_unowned_local_dofs(unowned_local_dofs, block_unowned_local_dofs):
     # Numbering of unowned dofs may be different, we can only check that the size
     # of the two vectors are consistent
     assert len(unowned_local_dofs) == len(block_unowned_local_dofs)
-    
+
 def assert_global_dofs(global_dofs, block_global_dofs):
     assert array_sorted_equal(global_dofs, block_global_dofs)
-    
+
 def assert_tabulated_dof_coordinates(dof_coordinates, block_dof_coordinates):
     assert array_equal(dof_coordinates, block_dof_coordinates)
-    
+
 # ================ EQUALITY BETWEEN BLOCK VECTORS ================ #
 def assert_block_vectors_equal(rhs, block_rhs, block_V):
     if isinstance(rhs, tuple):
@@ -107,7 +107,7 @@ def assert_block_vectors_equal(rhs, block_rhs, block_V):
     for (block, original) in map_block_to_original.items():
         rhsg_for_assert[block] = rhsg[original]
     assert array_equal(rhsg_for_assert, block_rhsg)
-    
+
 # ================ EQUALITY BETWEEN BLOCK MATRICES ================ #
 def assert_block_matrices_equal(lhs, block_lhs, block_V):
     if isinstance(lhs, tuple):
@@ -140,7 +140,7 @@ def assert_block_matrices_equal(lhs, block_lhs, block_V):
         for (block_j, original_j) in map_block_to_original.items():
             lhsg_for_assert[block_i, block_j] = lhsg[original_i, original_j]
     assert array_equal(lhsg_for_assert, block_lhsg)
-    
+
 # ================ EQUALITY BETWEEN BLOCK FUNCTIONS ================ #
 def assert_block_functions_equal(functions, block_function, block_V):
     if functions is None and block_function is None:
@@ -149,7 +149,7 @@ def assert_block_functions_equal(functions, block_function, block_V):
         assert_block_vectors_equal((functions[0].vector(), functions[1].vector()), block_function.block_vector(), block_V)
     else:
         assert_block_vectors_equal(functions.vector(), block_function.block_vector(), block_V)
-    
+
 def assert_functions_manipulations(functions, block_V):
     n_blocks = len(functions)
     assert n_blocks in (1, 2)
@@ -170,7 +170,7 @@ def assert_functions_manipulations(functions, block_V):
         assert array_equal(block_function_b.sub(index).vector().get_local(), block_function_a.sub(index).vector().get_local())
     # The two block vectors should store the same data
     assert array_equal(block_function_b.block_vector().get_local(), block_function_a.block_vector().get_local())
-    
+
 # ================ FUNCTION SPACES GENERATOR ================ #
 def StokesFunctionSpace(mesh, family, degree):
     stokes_element = StokesElement(family, mesh.ufl_cell(), degree)
@@ -180,7 +180,7 @@ def StokesElement(family, cell, degree):
     V_element = VectorElement(family, cell, degree + 1)
     Q_element = FiniteElement(family, cell, degree)
     return MixedElement(V_element, Q_element)
-    
+
 def FunctionAndRealSpace(mesh, family, degree):
     function_and_real_element = FunctionAndRealElement(family, mesh.ufl_cell(), degree)
     return FunctionSpace(mesh, function_and_real_element)
@@ -189,7 +189,7 @@ def FunctionAndRealElement(family, cell, degree):
     V_element = FiniteElement(family, cell, degree)
     R_element = FiniteElement("Real", cell, 0)
     return MixedElement(V_element, R_element)
-    
+
 def get_function_spaces_1():
     return (
         lambda mesh: FunctionSpace(mesh, "Lagrange", 1),
@@ -205,10 +205,10 @@ def get_function_spaces_1():
         pytest_mark_slow(lambda mesh: FunctionAndRealSpace(mesh, "Lagrange", 1)),
         pytest_mark_slow(lambda mesh: FunctionAndRealSpace(mesh, "Lagrange", 2))
     )
-    
+
 def get_function_spaces_2():
     return pytest_mark_slow_for_cartesian_product(get_function_spaces_1, get_function_spaces_1)
-    
+
 def get_elements_1():
     return (
         lambda mesh: FiniteElement("Lagrange", mesh.ufl_cell(), 1),
@@ -224,10 +224,10 @@ def get_elements_1():
         pytest_mark_slow(lambda mesh: FunctionAndRealElement("Lagrange", mesh.ufl_cell(), 1)),
         pytest_mark_slow(lambda mesh: FunctionAndRealElement("Lagrange", mesh.ufl_cell(), 2))
     )
-    
+
 def get_elements_2():
     return pytest_mark_slow_for_cartesian_product(get_elements_1, get_elements_1)
-    
+
 # ================ SUBDOMAIN GENERATOR ================ #
 def UnitSquareSubDomain(X, Y):
     class CustomSubDomain(SubDomain):
@@ -256,10 +256,10 @@ def UnitSquareInterface(X=None, Y=None, on_boundary=False):
             def inside(self, x, on_boundary_):
                 return on_boundary_
     return CustomSubDomain()
-    
+
 def OnBoundary():
     return UnitSquareInterface(on_boundary=True)
-    
+
 def get_restrictions_1():
     return (
         None,
@@ -293,7 +293,7 @@ def get_restrictions_2():
         pytest_mark_slow((UnitSquareInterface(on_boundary=True), UnitSquareSubDomain(0.5, 0.75))),
         pytest_mark_slow((UnitSquareInterface(Y=0.25), UnitSquareSubDomain(0.5, 0.75)))
     )
-    
+
 # ================ BLOCK BOUNDARY CONDITIONS GENERATOR ================ #
 # Computation of block bcs for single block
 def get_block_bcs_1():
@@ -315,7 +315,7 @@ def get_block_bcs_1():
         pytest_mark_slow(lambda block_V: BlockDirichletBC([None], block_function_space=block_V)),
         lambda block_V: BlockDirichletBC([_get_bc_1(block_V)])
     )
-    
+
 # Computation of block bcs for two blocks
 def get_block_bcs_2():
     def _get_bc_1(block_V):
@@ -351,7 +351,7 @@ def get_block_bcs_2():
         pytest_mark_slow(lambda block_V: BlockDirichletBC([None, _get_bc_2(block_V)])),
         lambda block_V: BlockDirichletBC([_get_bc_1(block_V), _get_bc_2(block_V)])
     )
-    
+
 # ================ RIGHT-HAND SIDE BLOCK FORM GENERATOR ================ #
 # Computation of rhs block form for single block
 def get_rhs_block_form_1(block_V):
@@ -372,7 +372,7 @@ def get_rhs_block_form_1(block_V):
                         ("7*x[0] + 11*x[1]*x[1]", "13*x[0] + 17*x[1]*x[1]")), degree=2)
         block_form = [inner(f, v)*dx]
     return block_form
-    
+
 # Computation of rhs block form for two blocks
 def get_rhs_block_form_2(block_V):
     block_v = BlockTestFunction(block_V)
@@ -407,7 +407,7 @@ def get_rhs_block_form_2(block_V):
                          ("7*x[1] + 11*x[0]*x[0]", "13*x[1] + 17*x[0]*x[0]")), degree=2)
         block_form[1] = inner(f2, v2)*dx
     return block_form
-    
+
 # ================ LEFT-HAND SIDE BLOCK FORM GENERATOR ================ #
 # Computation of lhs block form for single block
 def get_lhs_block_form_1(block_V):
@@ -430,7 +430,7 @@ def get_lhs_block_form_1(block_V):
                         ("7*x[0] + 11*x[1]*x[1]", "13*x[0] + 17*x[1]*x[1]")), degree=2)
         block_form = [[(f[0, 0]*u[0, 0]*v[0, 0] + f[0, 1]*u[0, 1].dx(1)*v[0, 1] + f[1, 0]*u[1, 0].dx(0)*v[1, 0].dx(1) + f[1, 1]*u[1, 1].dx(0)*v[1, 1])*dx]]
     return block_form
-    
+
 # Computation of lhs block form for two blocks
 def get_lhs_block_form_2(block_V):
     block_u = BlockTrialFunction(block_V)
@@ -522,7 +522,7 @@ def get_lhs_block_form_2(block_V):
             block_form[0][1] = (f1[0, 0]*u2[0, 0]*v1[0, 0] + f1[0, 1]*u2[0, 1].dx(1)*v1[0, 1] + f1[1, 0]*u2[1, 0].dx(0)*v1[1, 0].dx(1) + f1[1, 1]*u2[1, 1].dx(0)*v1[1, 1])*dx
             block_form[1][0] = (f2[0, 0]*u1[0, 0]*v2[0, 0] + f2[0, 1]*u1[0, 1].dx(1)*v2[0, 1] + f2[1, 0]*u1[1, 0].dx(0)*v2[1, 0].dx(1) + f2[1, 1]*u1[1, 1].dx(0)*v2[1, 1])*dx
     return block_form
-    
+
 # ================ RIGHT-HAND SIDE BLOCK FORM ASSEMBLER ================ #
 def assemble_and_block_assemble_vector(block_form):
     N = len(block_form)
@@ -531,7 +531,7 @@ def assemble_and_block_assemble_vector(block_form):
         return assemble(block_form[0]), block_assemble(block_form)
     else:
         return (assemble(block_form[0]), assemble(block_form[1])), block_assemble(block_form)
-        
+
 def apply_bc_and_block_bc_vector(rhs, block_rhs, block_bcs):
     if block_bcs is None:
         return
@@ -544,7 +544,7 @@ def apply_bc_and_block_bc_vector(rhs, block_rhs, block_bcs):
         [bc1.apply(rhs[0]) for bc1 in block_bcs[0]]
         [bc2.apply(rhs[1]) for bc2 in block_bcs[1]]
         block_bcs.apply(block_rhs)
-    
+
 def apply_bc_and_block_bc_vector_non_linear(rhs, block_rhs, block_bcs, block_V):
     if block_bcs is None:
         return (None, None)
@@ -564,7 +564,7 @@ def apply_bc_and_block_bc_vector_non_linear(rhs, block_rhs, block_bcs, block_V):
         block_function = BlockFunction(block_V)
         block_bcs.apply(block_rhs, block_function.block_vector())
         return ((function1, function2), block_function)
-        
+
 # ================ LEFT-HAND SIDE BLOCK FORM ASSEMBLER ================ #
 def assemble_and_block_assemble_matrix(block_form):
     N = len(block_form)
@@ -575,7 +575,7 @@ def assemble_and_block_assemble_matrix(block_form):
         return assemble(block_form[0][0]), block_assemble(block_form)
     else:
         return ((assemble(block_form[0][0]), assemble(block_form[0][1])), (assemble(block_form[1][0]), assemble(block_form[1][1]))), block_assemble(block_form)
-    
+
 def apply_bc_and_block_bc_matrix(lhs, block_lhs, block_bcs):
     if block_bcs is None:
         return
@@ -590,7 +590,7 @@ def apply_bc_and_block_bc_matrix(lhs, block_lhs, block_bcs):
         [bc1.zero(lhs[1][0]) for bc1 in block_bcs[1]]
         [bc1.apply(lhs[1][1]) for bc1 in block_bcs[1]]
         block_bcs.apply(block_lhs)
-        
+
 # ================ BLOCK FUNCTIONS GENERATOR ================ #
 # Computation of block function for single block
 def get_list_of_functions_1(block_V):
@@ -605,7 +605,7 @@ def get_list_of_functions_1(block_V):
         f = Expression((("2*x[0] + 4*x[1]*x[1]", "3*x[0] + 5*x[1]*x[1]"),
                         ("7*x[0] + 11*x[1]*x[1]", "13*x[0] + 17*x[1]*x[1]")), degree=2)
     return [project(f, block_V[0])]
-    
+
 # Computation of block function for two blocks
 def get_list_of_functions_2(block_V):
     shape_1 = block_V[0].ufl_element().value_shape()
@@ -629,7 +629,7 @@ def get_list_of_functions_2(block_V):
         f2 = Expression((("2*x[1] + 4*x[0]*x[0]", "3*x[1] + 5*x[0]*x[0]"),
                          ("7*x[1] + 11*x[0]*x[0]", "13*x[1] + 17*x[0]*x[0]")), degree=2)
     return [project(f1, block_V[0]), project(f2, block_V[1])]
-    
+
 # ================ PARALLEL SUPPORT ================ #
 # Gather matrices, vector and dicts on zero-th process
 def allgather(obj, comm, **kwargs):

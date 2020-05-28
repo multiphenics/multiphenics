@@ -26,14 +26,14 @@ from multiphenics.la.generic_block_vector import GenericBlockVector
 
 def unwrap_sub_functions(sub_functions):
     return [sub_function._cpp_object for sub_function in sub_functions]
-    
+
 BlockFunction_Base = cpp.function.BlockFunction
 
 class BlockFunction(object):
     def __init__(self, *args, **kwargs):
         """Initialize BlockFunction."""
         assert len(args) in (1, 2, 3)
-        
+
         assert isinstance(args[0], BlockFunctionSpace)
         block_V = args[0]
         if len(args) == 1:
@@ -69,38 +69,38 @@ class BlockFunction(object):
         self._cpp_object = BlockFunction_Base(block_V.cpp_object(), block_vec)
         self._block_function_space = block_V
         self._init_sub_functions()
-        
+
     def _init_from_block_function_space_and_cpp_block_function(self, block_V, cpp_object):
         self._cpp_object = cpp_object
         self._block_function_space = block_V
         self._init_sub_functions()
-        
+
     def _init_from_block_function_space_and_sub_functions(self, block_V, sub_functions):
         self._cpp_object = BlockFunction_Base(block_V.cpp_object(), unwrap_sub_functions(sub_functions))
         self._block_function_space = block_V
         self._num_sub_spaces = block_V.num_sub_spaces()
         assert len(sub_functions) == self._num_sub_spaces
         self._sub_functions = sub_functions
-        
+
     def _init_from_block_function_space_and_block_vector_and_sub_functions(self, block_V, block_vec, sub_functions):
         self._cpp_object = BlockFunction_Base(block_V.cpp_object(), block_vec, unwrap_sub_functions(sub_functions))
         self._block_function_space = block_V
         self._num_sub_spaces = block_V.num_sub_spaces()
         assert len(sub_functions) == self._num_sub_spaces
         self._sub_functions = sub_functions
-        
+
     def _init_sub_functions(self):
         def extend_sub_function(sub_function, i):
             # Make sure to preserve a reference to the block function
             def block_function(self_):
                 return self
             sub_function.block_function = types.MethodType(block_function, sub_function)
-            
+
             # ... and a reference to the block index
             def block_index(self_):
                 return i
             sub_function.block_index = types.MethodType(block_index, sub_function)
-            
+
             # ... and that these methods are preserved by sub_function.sub()
             original_sub = sub_function.sub
             def sub(self_, j, deepcopy=False):
@@ -108,30 +108,30 @@ class BlockFunction(object):
                 extend_sub_function(output, i)
                 return output
             sub_function.sub = types.MethodType(sub, sub_function)
-            
+
             # Furthermore, patch assign function to call block_function's apply
             original_assign = sub_function.assign
             def assign(self_, other):
                 original_assign(other)
                 self.apply("from subfunctions", i)
             sub_function.assign = types.MethodType(assign, sub_function)
-            
+
         self._num_sub_spaces = self.block_function_space().num_sub_spaces()
         self._sub_functions = list()
         for i in range(self._num_sub_spaces):
             # Extend with the python layer of dolfin's Function
             sub_function = dolfin.Function(self._cpp_object.sub(i))
-            
+
             # Extend with block function and block index methods
             extend_sub_function(sub_function, i)
-            
+
             # Append
             self._sub_functions.append(sub_function)
-            
+
     def __len__(self):
         "Return the number of sub functions"
         return self._num_sub_spaces
-        
+
     def __getitem__(self, i):
         """
         Return a sub function, *neglecting* restrictions.
@@ -152,7 +152,7 @@ class BlockFunction(object):
             for j in range(i.start or 0, i.stop or len(self), i.step or 1):
                 output.append(self.sub(j))
             return output
-        
+
     def block_function_space(self):
         """
         Return block function space
@@ -161,26 +161,26 @@ class BlockFunction(object):
             _BlockFunctionSpace_
                 The block subspace.
         """
-        
+
         return self._block_function_space
-        
+
     def block_vector(self):
         """
         Return block vector
         """
-        
+
         def extend_block_vector(block_vector):
             # Make sure to preserve a reference to the block function
             def block_function(self_):
                 return self
             block_vector.block_function = types.MethodType(block_function, block_vector)
-            
+
         block_vector = self._cpp_object.block_vector()
         block_vector = as_backend_type(block_vector)
         extend_block_vector(block_vector)
-        
+
         return block_vector
-        
+
     def ufl_element(self):
         return self._block_function_space.ufl_element()
 
@@ -203,7 +203,7 @@ class BlockFunction(object):
                                % (self._num_sub_spaces - 1))
 
         assert deepcopy is False # no usage envisioned for the other case
-        
+
         return self._sub_functions[i]
 
     def block_split(self, deepcopy=False):
@@ -221,10 +221,10 @@ class BlockFunction(object):
         """
 
         return tuple(self.sub(i, deepcopy) for i in range(self._num_sub_spaces))
-        
+
     def __iter__(self):
         return self._sub_functions.__iter__()
-        
+
     def copy(self, deepcopy=False):
         """
         Return a copy of itself
@@ -237,10 +237,10 @@ class BlockFunction(object):
         """
         assert deepcopy is True # no usage envisioned for the other case
         return BlockFunction(self.block_function_space(), self.block_vector().copy())
-        
+
     def __str__(self):
         return str([str(subf) for subf in self._sub_functions])
-        
+
     def apply(self, mode, only=None):
         if only is None:
             only = -1
@@ -287,7 +287,7 @@ class BlockFunction(object):
             return output
         else:
             return NotImplemented
-            
+
     def __radd__(self, other):
         return self.__add__(other)
 
@@ -301,7 +301,7 @@ class BlockFunction(object):
 
     def __rtruediv__(self, other):
         return NotImplemented
-        
+
     def __neg__(self):
         return -1.*self
 

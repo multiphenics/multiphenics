@@ -46,7 +46,7 @@ class MeshRestriction(list):
                 self.append(mesh_function_d)
         elif isinstance(arg, str):
             self._read(mesh, arg)
-            
+
     def _read(self, mesh, filename, encoding=None):
         assert filename.endswith(".rtc.xml") or filename.endswith(".rtc.xdmf")
         # Read in MeshFunctions
@@ -62,7 +62,7 @@ class MeshRestriction(list):
                 else:
                     xdmf_file.read(mesh_function_d)
             self.append(mesh_function_d)
-            
+
     def _write(self, filename, encoding=None):
         assert filename.endswith(".rtc.xml") or filename.endswith(".rtc.xdmf")
         # Create output folder

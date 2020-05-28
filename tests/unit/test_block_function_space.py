@@ -55,7 +55,7 @@ def assert_dof_map_single_block_no_restriction(V, block_V):
     V_dof_coordinates = V.tabulate_dof_coordinates()
     block_V_dof_coordinates = block_V.tabulate_dof_coordinates()
     assert_tabulated_dof_coordinates(V_dof_coordinates, block_V_dof_coordinates)
-    
+
 # Single block, no restriction, from list
 @pytest.mark.parametrize("FunctionSpace", get_function_spaces_1())
 def test_single_block_no_restriction_from_list(mesh, FunctionSpace):
@@ -99,7 +99,7 @@ def assert_dof_map_two_blocks_no_restriction(V1, V2, block_V):
     V_dof_coordinates = concatenate((V1.tabulate_dof_coordinates(), V2.tabulate_dof_coordinates()))
     block_V_dof_coordinates = block_V.tabulate_dof_coordinates()
     assert_tabulated_dof_coordinates(V_dof_coordinates, block_V_dof_coordinates)
-        
+
 # Two blocks, no restriction, from list
 @pytest.mark.parametrize("FunctionSpaces", get_function_spaces_2())
 def test_two_blocks_no_restriction_from_list(mesh, FunctionSpaces):
@@ -108,7 +108,7 @@ def test_two_blocks_no_restriction_from_list(mesh, FunctionSpaces):
     V2 = FunctionSpace2(mesh)
     block_V = BlockFunctionSpace([V1, V2])
     assert_dof_map_two_blocks_no_restriction(V1, V2, block_V)
-    
+
 # Two blocks, no restriction from block element
 @pytest.mark.parametrize("Elements", get_elements_2())
 def test_two_blocks_no_restriction_from_block_element(mesh, Elements):
@@ -138,7 +138,7 @@ def assert_dof_map_single_block_with_restriction(V, block_V):
         block_V_cell_unowned_local_dofs = [map_block_to_original[b] for b in block_V_cell_dofs if b >= block_local_dimension]
         assert_owned_local_dofs(V_cell_owned_local_dofs, block_V_cell_owned_local_dofs)
         assert_unowned_local_dofs(V_cell_unowned_local_dofs, block_V_cell_unowned_local_dofs)
-        
+
 # Single block, with restriction, from list
 @pytest.mark.parametrize("restriction", get_restrictions_1())
 @pytest.mark.parametrize("FunctionSpace", get_function_spaces_1())
@@ -187,7 +187,7 @@ def assert_dof_map_test_two_blocks_with_restriction(V1, V2, block_V):
         block_V_cell_unowned_local_dofs = [map_block_to_original[b] for b in block_V_cell_dofs if b >= block_local_dimension]
         assert_owned_local_dofs(V_cell_owned_local_dofs, block_V_cell_owned_local_dofs)
         assert_unowned_local_dofs(V_cell_unowned_local_dofs, block_V_cell_unowned_local_dofs)
-        
+
 # Two blocks, with restrictions, from list
 @pytest.mark.parametrize("restriction", get_restrictions_2())
 @pytest.mark.parametrize("FunctionSpaces", get_function_spaces_2())

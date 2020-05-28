@@ -38,7 +38,7 @@ snes_solver_parameters = {"nonlinear_solver": "snes",
                                           "maximum_iterations": 20,
                                           "report": True,
                                           "error_on_nonconvergence": True}}
-                                          
+
 # Mesh
 mesh = Mesh("data/backward_facing_step.xml")
 subdomains = MeshFunction("size_t", mesh, "data/backward_facing_step_physical_region.xml")
@@ -90,9 +90,9 @@ def run_monolithic():
     # plt.figure()
     # plot(p, title="Pressure monolithic", mode="color")
     # plt.show()
-    
+
     return (u, p)
-    
+
 (u_m, p_m) = run_monolithic()
 
 # -------------------------------------------------- #
@@ -133,9 +133,9 @@ def run_block():
     # plt.figure()
     # plot(p, title="Pressure block", mode="color")
     # plt.show()
-    
+
     return (u, p)
-    
+
 (u_b, p_b) = run_block()
 
 # -------------------------------------------------- #

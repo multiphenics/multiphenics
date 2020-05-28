@@ -91,7 +91,7 @@ class DRight(SubDomain):
 class DLeft(SubDomain):
     def inside(self, x, on_boundary):
         return (near(x[0], -1.0) and between(x[1], (-2.0, 0.0)) and on_boundary)
-   
+
 class Bot(SubDomain):
     def inside(self, x, on_boundary):
         return (near(x[1], -2.0) and on_boundary)
@@ -103,7 +103,7 @@ class MStokes(SubDomain):
 class MDarcy(SubDomain):
     def inside(self, x, on_boundary):
         return x[1] <= 0.
-    
+
 class Interface(SubDomain):
     def inside(self, x, on_boundary):
         return near(x[1], 0.0)

@@ -27,7 +27,7 @@ def split(f):
             def block_function_space(self_):
                 return f.block_function_space()
             s.block_function_space = types.MethodType(block_function_space, s)
-        
+
         if hasattr(f, "block_index"):
             # Add a block_index method
             def block_index(self_):

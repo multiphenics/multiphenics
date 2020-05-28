@@ -31,7 +31,7 @@ s.t.
                y = u1*l1 + u2*l2 + u3*l3    on \Gamma_2
     \partial_n y = 0                        on \Gamma_3
                y = 0                        on \Gamma_4
-             
+
 where
     \Omega                               unit square
     u1, u2, u3 in IR                     control variables
@@ -40,7 +40,7 @@ where
     \alpha > 0                           penalization parameter
     y_d                                  desired state
     f                                    forcing term
-    
+
 using an adjoint formulation solved by a one shot approach
 """
 

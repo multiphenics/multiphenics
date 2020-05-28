@@ -52,7 +52,7 @@ class Left(SubDomain):
 class Right(SubDomain):
     def inside(self, x, on_boundary):
         return x[0] >= 0.
-        
+
 boundary_restriction = MeshRestriction(mesh, on_boundary)
 interface_restriction = MeshRestriction(mesh, on_interface)
 left = Left()

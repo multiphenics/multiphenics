@@ -20,7 +20,7 @@ import dolfin
 from dolfin import DirichletBC, Function
 import dolfin.cpp
 from multiphenics.python import cpp
-    
+
 def DecorateGetEigenPair(SLEPcEigenSolver):
     class DecoratedSLEPcEigenSolver(SLEPcEigenSolver):
         def get_eigenpair(self, r_fun, c_fun, i):
@@ -28,9 +28,9 @@ def DecorateGetEigenPair(SLEPcEigenSolver):
             assert isinstance(c_fun, Function)
             (lr, lc, _, _) = SLEPcEigenSolver.get_eigenpair(self, r_fun._cpp_object, c_fun._cpp_object, i)
             return (lr, lc, r_fun, c_fun)
-    
+
     return DecoratedSLEPcEigenSolver
-    
+
 def SLEPcEigenSolver(A, B=None, bcs=None):
     if bcs is None:
         EigenSolver = DecorateGetEigenPair(dolfin.SLEPcEigenSolver)

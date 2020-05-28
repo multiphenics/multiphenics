@@ -37,7 +37,7 @@ def generate_subdomain_restriction(mesh, subdomains, subdomain_id):
                     restriction[d][e] = True
     # Return
     return restriction
-    
+
 # Helper function to generate interface restriction based on a pair of gmsh subdomain ids
 def generate_interface_restriction(mesh, subdomains, subdomain_ids):
     assert isinstance(subdomain_ids, set)

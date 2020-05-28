@@ -22,6 +22,6 @@ from multiphenics.function.block_test_trial_function_base import BlockTestTrialF
 class BlockTestFunction(BlockTestTrialFunction_Base):
     def __new__(cls, arg1):
         return BlockTestTrialFunction_Base.__new__(cls, arg1, TestFunction)
-        
+
     def __init__(self, arg1):
         BlockTestTrialFunction_Base.__init__(self, arg1, TestFunction)

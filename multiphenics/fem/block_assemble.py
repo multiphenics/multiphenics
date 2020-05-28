@@ -42,7 +42,7 @@ def block_assemble(block_form,
     # Create tensor
     comm = block_form.mesh().mpi_comm()
     block_tensor = _create_block_tensor(comm, block_form, block_form.rank(), block_tensor)
-        
+
     # Call C++ assemble function
     block_assembler = BlockAssembler()
     block_assembler.add_values = add_values
@@ -52,12 +52,12 @@ def block_assemble(block_form,
 
     # Return value
     return block_tensor
-    
+
 def _create_block_tensor(comm, block_form, rank, block_tensor):
     backend = BlockDefaultFactory()
     block_tensor = _dolfin_create_tensor(comm, block_form, rank, backend, block_tensor)
     block_tensor = as_backend_type(block_tensor)
-    
+
     # Attach block dofmap to tensor
     assert rank in (1, 2)
     if rank == 2:
@@ -75,7 +75,7 @@ def _create_block_tensor(comm, block_form, rank, block_tensor):
             block_tensor.attach_block_dof_map(block_dofmap)
         else:
             assert block_dofmap == block_tensor.get_block_dof_map()
-            
+
     # Store private attribute for BlockDirichletBC application to off diagonal blocks
     if rank == 2:
         bcs_zero_off_block_diagonal = empty(block_form.shape, dtype=bool)
@@ -83,5 +83,5 @@ def _create_block_tensor(comm, block_form, rank, block_tensor):
             for J in range(block_form.shape[1]):
                 bcs_zero_off_block_diagonal[I, J] = not _is_zero(block_form[I, J])
         block_tensor._bcs_zero_off_block_diagonal = bcs_zero_off_block_diagonal.tolist()
-    
+
     return block_tensor

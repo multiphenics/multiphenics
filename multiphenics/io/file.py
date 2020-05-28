@@ -21,13 +21,13 @@ import dolfin
 class MeshRestrictionXMLFile(object):
     def __init__(self, filename, encoding=None):
         self.filename = filename
-    
+
     def write(self, content):
         content._write(self.filename)
-            
+
     def __lshift__(self, content):
         self.write(content)
-            
+
 def File(filename, encoding=None):
     if filename.endswith(".rtc.xml"):
         assert encoding is None

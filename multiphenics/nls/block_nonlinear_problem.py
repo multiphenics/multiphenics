@@ -31,7 +31,7 @@ class BlockNonlinearProblem(NonlinearProblem):
         # Create block backend for wrapping
         self.block_backend = BlockDefaultFactory()
         self.block_dof_map = self.block_solution.block_function_space().block_dofmap()
-        
+
     def F(self, fenics_residual, _):
         # Update block solution subfunctions based on the third argument, which has already been
         # stored in self.block_solution.block_vector()
@@ -43,7 +43,7 @@ class BlockNonlinearProblem(NonlinearProblem):
         # Apply boundary conditions
         if self.bcs is not None:
             self.bcs.apply(block_residual, self.block_solution.block_vector())
-        
+
     def J(self, fenics_jacobian, _):
         # No need to update block solution subfunctions, this has already been done in the residual
         # Wrap FEniCS jacobian into a block jacobian

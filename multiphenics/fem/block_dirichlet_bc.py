@@ -61,19 +61,19 @@ class BlockDirichletBC(BlockDirichletBC_Base):
                 bc_I.parameters["check_dofmap_range"] = False
         # Call Parent
         BlockDirichletBC_Base.__init__(self, self.bcs, self._block_function_space.cpp_object())
-        
+
     def __getitem__(self, key):
         return self.bcs[key]
-        
+
     def __iter__(self):
         return self.bcs.__iter__()
-        
+
     def __len__(self):
         return len(self.bcs)
-        
+
     def block_function_space(self):
         return self._block_function_space
-    
+
     @staticmethod
     def _flatten_bcs(bcs):
         # https://stackoverflow.com/questions/2158395/flatten-an-irregular-list-of-lists
@@ -84,10 +84,10 @@ class BlockDirichletBC(BlockDirichletBC_Base):
                         yield sub
                 else:
                     yield el
-         
+
         # Flatten and remove any remaining None
         return [bc for bc in flatten(bcs) if bc is not None]
-        
+
     def apply(self, *args):
         assert len(args) in (1, 2, 3)
         if len(args) == 1:
@@ -122,7 +122,7 @@ class BlockDirichletBC(BlockDirichletBC_Base):
         else:
             raise ValueError("Invalid arguments")
         return
-        
+
     def zero(self, *args):
         assert len(args) == 1
         arg0 = args[0]

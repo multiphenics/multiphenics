@@ -26,7 +26,7 @@ In this tutorial we first solve the problem
 
 -u'' = f    in Omega = [0, 1]
  u   = 0    on Gamma = {0, 1}
- 
+
 using standard FEniCS code.
 
 Then we use multiphenics to solve the system
@@ -38,7 +38,7 @@ subject to
 
  w_1 = 0    on Gamma = {0, 1}
  w_2 = 0    on Gamma = {0, 1}
- 
+
 By construction the solution of the system is
     (w_1, w_2) = (u, u)
 
@@ -56,7 +56,7 @@ class Left(SubDomain):
 class Right(SubDomain):
     def inside(self, x, on_boundary):
         return on_boundary and abs(x[0] - 1.) < DOLFIN_EPS
-        
+
 boundaries = MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
 boundaries.set_all(0)
 left = Left()
@@ -88,10 +88,10 @@ def run_standard():
     # Solve the linear system
     U = Function(V)
     solve(A, U.vector(), F)
-    
+
     # Return the solution
     return U
-    
+
 U = run_standard()
 
 def run_block():
@@ -107,12 +107,12 @@ def run_block():
     aa = [[1*inner(grad(u1), grad(v1))*dx + 1*u1*v1*dx, 2*inner(grad(u2), grad(v1))*dx + 2*u2*v1*dx],
           [3*inner(grad(u1), grad(v2))*dx + 3*u1*v2*dx, 4*inner(grad(u2), grad(v2))*dx + 4*u2*v2*dx]]
     AA = block_assemble(aa)
-    
+
     # Create the block vector for the block RHS
     ff = [300*sin(20*x0)*v1*dx,
           700*sin(20*x0)*v2*dx]
     FF = block_assemble(ff)
-    
+
     # Apply block boundary conditions
     bc1 = DirichletBC(VV.sub(0), Constant(0.), boundaries, 1)
     bc2 = DirichletBC(VV.sub(1), Constant(0.), boundaries, 1)
@@ -120,15 +120,15 @@ def run_block():
                             bc2])
     bcs.apply(AA)
     bcs.apply(FF)
-    
+
     # Solve the block linear system
     UU = BlockFunction(VV)
     block_solve(AA, UU.block_vector(), FF)
     UU1, UU2 = UU
-    
+
     # Return the block solution
     return UU1, UU2
-    
+
 UU1, UU2 = run_block()
 
 # plt.figure()

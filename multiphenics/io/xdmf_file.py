@@ -21,10 +21,10 @@ import dolfin
 class MeshRestrictionXDMFFile(object):
     def __init__(self, filename):
         self.filename = filename
-    
+
     def write(self, content, encoding=None):
         content._write(self.filename, encoding)
-            
+
 def XDMFFile(arg1, arg2=None):
     if arg2 is None:
         assert isinstance(arg1, str)

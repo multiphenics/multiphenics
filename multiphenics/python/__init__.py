@@ -48,7 +48,7 @@ cpp = compile_package(
     "la/CondensedSLEPcEigenSolver.cpp",
     "la/CondensedBlockSLEPcEigenSolver.cpp",
 )
-    
+
 __all__ = [
     'cpp'
 ]

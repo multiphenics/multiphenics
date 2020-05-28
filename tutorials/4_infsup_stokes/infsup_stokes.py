@@ -36,7 +36,7 @@ mesh = UnitSquareMesh(32, 32)
 class Wall(SubDomain):
     def inside(self, x, on_boundary):
         return on_boundary and (x[1] < 0 + DOLFIN_EPS or x[1] > 1 - DOLFIN_EPS)
-    
+
 boundaries = MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
 boundaries.set_all(0)
 wall = Wall()
@@ -106,9 +106,9 @@ def run_monolithic():
     # plt.figure()
     # plot(p_fun, title="Pressure monolithic", mode="color")
     # plt.show()
-    
+
     return (r, u_fun_1, u_fun_2, p_fun)
-    
+
 (eig_m, u_fun_1_m, u_fun_2_m, p_fun_m) = run_monolithic()
 
 # -------------------------------------------------- #
@@ -149,7 +149,7 @@ def run_block():
     assert abs(c) < 1.e-10
     assert r > 0., "r = " + str(r) + " is not positive"
     print("Inf-sup constant (block): ", sqrt(r))
-    
+
     # Extract eigenfunctions
     r_fun, c_fun = BlockFunction(W), BlockFunction(W)
     eigensolver.get_eigenpair(r_fun, c_fun, 0)
@@ -163,9 +163,9 @@ def run_block():
     # plt.figure()
     # plot(p_fun, title="Pressure block", mode="color")
     # plt.show()
-    
+
     return (r, u_fun_1, u_fun_2, p_fun)
-    
+
 (eig_b, u_fun_1_b, u_fun_2_b, p_fun_b) = run_block()
 
 # -------------------------------------------------- #
@@ -210,5 +210,5 @@ def run_error(eig_m, eig_b, u_fun_1_m, u_fun_1_b, u_fun_2_m, u_fun_2_b, p_fun_m,
     select_error(err_1_plus, err_1_plus_norm, err_1_minus, err_1_minus_norm, u_fun_1_norm, "velocity 1")
     select_error(err_2_plus, err_2_plus_norm, err_2_minus, err_2_minus_norm, u_fun_2_norm, "velocity 2")
     select_error(err_p_plus, err_p_plus_norm, err_p_minus, err_p_minus_norm, p_fun_norm, "pressure")
-    
+
 run_error(eig_m, eig_b, u_fun_1_m, u_fun_1_b, u_fun_2_m, u_fun_2_b, p_fun_m, p_fun_b)
