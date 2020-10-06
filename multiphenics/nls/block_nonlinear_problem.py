@@ -17,15 +17,21 @@
 #
 
 from dolfin import NonlinearProblem
-from multiphenics.fem import block_assemble
+from multiphenics.fem import block_assemble, BlockForm, BlockForm1, BlockForm2
 from multiphenics.la import BlockDefaultFactory
 
 class BlockNonlinearProblem(NonlinearProblem):
     def __init__(self, residual_block_form, block_solution, bcs, jacobian_block_form):
         NonlinearProblem.__init__(self)
         # Store the input arguments
-        self.residual_block_form = residual_block_form
-        self.jacobian_block_form = jacobian_block_form
+        if isinstance(residual_block_form, BlockForm1):
+            self.residual_block_form = residual_block_form
+        else:
+            self.residual_block_form = BlockForm(residual_block_form)
+        if isinstance(jacobian_block_form, BlockForm2):
+            self.jacobian_block_form = jacobian_block_form
+        else:
+            self.jacobian_block_form = BlockForm(jacobian_block_form)
         self.block_solution = block_solution
         self.bcs = bcs
         # Create block backend for wrapping
