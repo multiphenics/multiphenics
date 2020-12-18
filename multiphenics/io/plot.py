@@ -24,4 +24,4 @@ def plot(obj, *args, **kwargs):
         for (d, mesh_function_d) in enumerate(obj):
             dolfin.plot(mesh_function_d, title="MeshFunction of dimension " + str(d), *args, **kwargs)
     else:
-        dolfin.plot(obj, *args, **kwargs)
+        return dolfin.plot(obj, *args, **kwargs)
