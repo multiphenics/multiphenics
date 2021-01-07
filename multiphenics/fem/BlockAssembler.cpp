@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2020 by the multiphenics authors
+// Copyright (C) 2016-2021 by the multiphenics authors
 //
 // This file is part of multiphenics.
 //
