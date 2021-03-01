@@ -17,7 +17,7 @@
 #
 
 FROM quay.io/fenicsproject/dev
-MAINTAINER Francesco Ballarin <francesco.ballarin@sissa.it>
+MAINTAINER Francesco Ballarin <francesco.ballarin@unicatt.it>
 
 USER root
 RUN apt-get -qq update && \
@@ -41,6 +41,6 @@ RUN mkdir multiphenics && \
     ln -s $FENICS_PREFIX/lib/python3.6/dist-packages/multiphenics*egg/multiphenics multiphenics/source && \
     mv /tmp/multiphenics/tests multiphenics/ && \
     mv /tmp/multiphenics/tutorials multiphenics
-    
+
 USER root
 RUN rm -rf /tmp/multiphenics
