@@ -41,15 +41,9 @@ setup(name="multiphenics",
       ],
       packages=find_packages(),
       include_package_data=True,
-      install_requires=[
-          "pytest-runner"
-      ],
       tests_require=[
           "pytest",
-          "pytest-flake8",
-          "pytest-html",
-          "pytest-instafail",
-          "pytest-xdist"
+          "pytest-flake8"
       ],
       zip_safe=False
       )
