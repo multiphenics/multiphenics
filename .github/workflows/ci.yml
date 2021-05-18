@@ -36,6 +36,7 @@ jobs:
           PYTEST_GC_PLUGIN=$(python3 -c 'import os, pytest; print(os.path.join(os.path.dirname(pytest.__file__) + "_gc", "plugin.py"))')
           sed -i "s/fixture(scope,/fixture(scope=scope,/g" ${PYTEST_GC_PLUGIN}
           python3 setup.py -q install
+          python3 -c "import multiphenics"
       - name: Run flake8 checks
         run: |
           pytest --flake8 -m flake8
