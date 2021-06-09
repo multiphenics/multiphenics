@@ -20,7 +20,7 @@ import os
 import importlib
 import pytest
 import matplotlib
-matplotlib.use("agg", warn=False)
+matplotlib.use("agg")
 import matplotlib.pyplot as plt
 
 def pytest_collect_file(path, parent):
