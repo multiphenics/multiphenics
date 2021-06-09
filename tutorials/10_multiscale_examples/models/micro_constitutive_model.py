@@ -16,32 +16,31 @@
 # along with multiphenics. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys
 import numpy as np
-import multiphenics as mp
+import ufl
 import dolfin as df
+import multiphenics as mp
 from timeit import default_timer as timer
-from ufl import nabla_div
 
-from formulation_dirichlet_lagrange import FormulationDirichletLagrange
-from formulation_linear import FormulationLinear
-from formulation_periodic import FormulationPeriodic
-from formulation_minimally_constrained import FormulationMinimallyConstrained
-from utils import symgrad, symgrad_voigt
+from formulations import (
+    FormulationDirichletLagrange, FormulationLinear, FormulationMinimallyConstrained, FormulationPeriodic)
+from utils import symgrad
 
-listMultiscaleModels = {'MR': FormulationMinimallyConstrained,
-                        'per': FormulationPeriodic,
-                        'lin': FormulationLinear,
-                        'lag': FormulationDirichletLagrange}
+list_multiscale_models = {
+    "MR": FormulationMinimallyConstrained,
+    "per": FormulationPeriodic,
+    "lin": FormulationLinear,
+    "lag": FormulationDirichletLagrange
+}
 
 
-class MicroConstitutiveModel:
+class MicroConstitutiveModel(object):
 
     def __init__(self, mesh, lame, model):
-        def sigmaLaw(u):
-            return lame[0]*nabla_div(u)*df.Identity(2) + 2*lame[1]*symgrad(u)
+        def sigma_law(u):
+            return lame[0] * ufl.nabla_div(u) * ufl.Identity(2) + 2 * lame[1] * symgrad(u)
 
-        self.sigmaLaw = sigmaLaw
+        self.sigma_law = sigma_law
 
         self.mesh = mesh
         self.model = model
@@ -50,72 +49,60 @@ class MicroConstitutiveModel:
 
         # it should be modified before computing tangent (if needed)
         self.others = {
-            'polyorder': 1,
-            'x0': self.coord_min[0], 'x1': self.coord_max[0],
-            'y0': self.coord_min[1], 'y1': self.coord_max[1]
-            }
+            "polyorder": 1,
+            "x0": self.coord_min[0], "x1": self.coord_max[0],
+            "y0": self.coord_min[1], "y1": self.coord_max[1]
+        }
 
-        self.multiscaleModel = listMultiscaleModels[model]
-        self.x = df.SpatialCoordinate(self.mesh)
+        self.multiscale_model = list_multiscale_models[model]
+        self.x = ufl.SpatialCoordinate(self.mesh)
         self.ndim = 2
         self.nvoigt = int(self.ndim*(self.ndim + 1)/2)
-        self.Chom_ = np.zeros((self.nvoigt, self.nvoigt))
+        self.Chom_ = None  # will be computed by get_tangent
 
-        # in the first run should compute
-        self.getTangent = self.computeTangent
+    def get_tangent(self):
+        if self.Chom_ is None:
+            self.Chom_ = np.zeros((self.nvoigt, self.nvoigt))
 
-    def computeTangent(self):
+            dy = ufl.Measure("dx", self.mesh)
+            vol = df.assemble(df.Constant(1.0) * dy)
+            y = ufl.SpatialCoordinate(self.mesh)
+            Eps = df.Constant(((0., 0.), (0., 0.)))  # just placeholder
 
-        dy = df.Measure('dx', self.mesh)
-        vol = df.assemble(df.Constant(1.0)*dy)
-        y = df.SpatialCoordinate(self.mesh)
-        Eps = df.Constant(((0., 0.), (0., 0.)))  # just placeholder
+            form = self.multiscale_model(self.mesh, self.sigma_law, Eps, self.others)
+            a, f, bcs, W = form()
 
-        form = self.multiscaleModel(self.mesh, self.sigmaLaw, Eps, self.others)
-        a, f, bcs, W = form()
-
-        start = timer()
-        A = mp.block_assemble(a)
-        if(len(bcs) > 0):
-            bcs.apply(A)
-
-        # decompose just once (the faster for single process)
-        solver = df.PETScLUSolver('superlu')
-        sol = mp.BlockFunction(W)
-
-        end = timer()
-        print('time assembling system', end - start)
-
-        for i in range(self.nvoigt):
             start = timer()
-            Eps.assign(df.Constant(macro_strain(i)))
-            F = mp.block_assemble(f)
-            if(len(bcs) > 0):
-                bcs.apply(F)
+            A = mp.block_assemble(a)
+            if len(bcs) > 0:
+                bcs.apply(A)
 
-            solver.solve(A, sol.block_vector(), F)
-            sol.block_vector().block_function().apply("to subfunctions")
-
-            sig_mu = self.sigmaLaw(df.dot(Eps, y) + sol[0])
-            sigma_hom = Integral(sig_mu, dy, (2, 2))/vol
-
-            self.Chom_[:, i] = sigma_hom.flatten()[[0, 3, 1]]
+            # decompose just once, since the matrix A is the same in every solve
+            solver = df.PETScLUSolver("superlu")
+            sol = mp.BlockFunction(W)
 
             end = timer()
-            print('time in solving system', end - start)
+            print("time assembling system", end - start)
 
-        print(self.Chom_)
+            for i in range(self.nvoigt):
+                start = timer()
+                Eps.assign(df.Constant(self.macro_strain(i)))
+                F = mp.block_assemble(f)
+                if len(bcs) > 0:
+                    bcs.apply(F)
 
-        # from the second run onwards, just returns
-        self.getTangent = self.getTangent_
+                solver.solve(A, sol.block_vector(), F)
+                sol.block_vector().block_function().apply("to subfunctions")
+
+                sig_mu = self.sigma_law(df.dot(Eps, y) + sol[0])
+                sigma_hom = self.integrate(sig_mu, dy, (2, 2))/vol
+
+                self.Chom_[:, i] = sigma_hom.flatten()[[0, 3, 1]]
+
+                end = timer()
+                print("time in solving system", end - start)
 
         return self.Chom_
-
-    def getTangent_(self):
-        return self.Chom_
-
-    def solveStress(self, u):
-        return df.dot(df.Constant(self.getTangent()), symgrad_voigt(u))
 
     @staticmethod
     def macro_strain(i):
@@ -125,14 +112,14 @@ class MicroConstitutiveModel:
                         [Eps_Voigt[2] / 2., Eps_Voigt[1]]])
 
     @staticmethod
-    def Integral(u, dx, shape):
+    def integrate(u, dx, shape):
         n = len(shape)
         valueIntegral = np.zeros(shape)
 
+        assert n in (1, 2)
         if n == 1:
             for i in range(shape[0]):
                 valueIntegral[i] = df.assemble(u[i]*dx)
-
         elif n == 2:
             for i in range(shape[0]):
                 for j in range(shape[1]):
