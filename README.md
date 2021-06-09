@@ -27,15 +27,16 @@ $FENICS_HOME/multiphenics
 
 ### 3. Tutorials
 Several tutorials are provided in the [**tutorials** subfolder](https://github.com/multiphenics/multiphenics/tree/master/tutorials).
-* **Tutorial 1**: block Poisson test case, to introduce the block notation used in the library.
-* **Tutorial 2**: Navier-Stokes problem using block matrices.
-* **Tutorial 3**: weak imposition of Dirichlet boundary conditions by Lagrange multipliers using block matrices and discarding interior degrees of freedom.
-* **Tutorial 4**: computation of the inf-sup constant for a Stokes problem assembled using block matrices.
-* **Tutorial 5**: computation of the inf-sup constant for the problem presented in tutorial 3.
-* **Tutorial 6**: several examples on optimal control problems, with different state equations (elliptic, Stokes, Navier-Stokes), control (distributed or boundary) and observation (distributed or boundary).
-* **Tutorial 7**: generation of restrictions for meshes obtained from gmsh.
-* **Tutorial 8**: how to get the list of degrees of freedom associated to a specific restriction, and use it e.g. to perform local modifications to assembled tensors.
-* **Tutorial 9**: applications of **multiphenics** to multiphysics problems. We are looking forward to receiving further multiphysics examples from our users!
+* **Tutorial 01**: block Poisson test case, to introduce the block notation used in the library.
+* **Tutorial 02**: Navier-Stokes problem using block matrices.
+* **Tutorial 03**: weak imposition of Dirichlet boundary conditions by Lagrange multipliers using block matrices and discarding interior degrees of freedom.
+* **Tutorial 04**: computation of the inf-sup constant for a Stokes problem assembled using block matrices.
+* **Tutorial 05**: computation of the inf-sup constant for the problem presented in tutorial 3.
+* **Tutorial 06**: several examples on optimal control problems, with different state equations (elliptic, Stokes, Navier-Stokes), control (distributed or boundary) and observation (distributed or boundary).
+* **Tutorial 07**: generation of restrictions for meshes obtained from gmsh.
+* **Tutorial 08**: how to get the list of degrees of freedom associated to a specific restriction, and use it e.g. to perform local modifications to assembled tensors.
+* **Tutorial 09**: applications of **multiphenics** to multiphysics problems. We are looking forward to receiving further multiphysics examples from our users!
+* **Tutorial 10**: applications of **multiphenics** to multiscale problems. We are looking forward to receiving further multiscale examples from our users!
 
 ### 4. Authors and contributors
 **multiphenics** is currently developed and maintained at the [Catholic University of the Sacred Heart](https://www.unicatt.it/) by [Dr. Francesco Ballarin](https://www.francescoballarin.it) in collaboration with [Prof. Gianluigi Rozza](https://people.sissa.it/~grozza/)'s group at [SISSA mathLab](http://mathlab.sissa.it/). The financial support of the [AROMA-CFD ERC CoG project](https://people.sissa.it/~grozza/aroma-cfd/) is gratefully acknowledged. Please see the [AUTHORS file](https://github.com/multiphenics/multiphenics/blob/master/AUTHORS) for a list of contributors.
