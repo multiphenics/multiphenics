@@ -16,26 +16,24 @@
 # along with multiphenics. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys
-import multiphenics as mp
+import ufl
 import dolfin as df
-sys.path.insert(0, '../core/')
-from fenicsUtils import symgrad
+import multiphenics as mp
+from utils import symgrad
 
 
-class MultiscaleFormulation:
+class MultiscaleFormulation(object):
 
     def __init__(self, mesh, sigma, Eps, others):
-
         self.mesh = mesh
         self.others = others
         self.sigma = sigma
         self.Eps = Eps
 
-        V = self.flutuationSpace()
-        R = self.zeroAverageSpace()
-        restrictions = [None, None] + self.otherRestrictions()
-        W = [V, R] + self.otherSpaces()
+        V = self.fluctuation_space()
+        R = self.zero_average_space()
+        restrictions = [None, None] + self.other_restrictions()
+        W = [V, R] + self.other_spaces()
         self.W = mp.BlockFunctionSpace(W, restrict=restrictions)
 
         self.uu = mp.BlockTrialFunction(self.W)
@@ -47,37 +45,30 @@ class MultiscaleFormulation:
         return self.blocks() + self.bcs() + [self.W]
 
     def blocks(self):
-        dx = df.Measure('dx', self.mesh)
+        dx = ufl.Measure("dx", self.mesh)
 
         u, p = self.uu_[0:2]
         v, q = self.vv_[0:2]
 
-        aa = [[df.inner(self.sigma(u), symgrad(v))*dx, df.inner(p, v)*dx],
-              [df.inner(q, u)*dx(), 0]]
+        aa = [[ufl.inner(self.sigma(u), symgrad(v)) * dx, ufl.inner(p, v) * dx],
+              [ufl.inner(q, u) * dx, 0]]
 
-        # dot(sigma(Eps) , symgrad(v)) = dot(Eps , sigma(symgrad(v))
-        ff = [-df.inner(self.Eps, self.sigma(v))*dx, 0]
+        # Notice that dot(sigma(Eps), symgrad(v)) = dot(Eps, sigma(symgrad(v)))
+        ff = [-ufl.inner(self.Eps, self.sigma(v)) * dx, 0]
 
         return [aa, ff]
 
     def bcs(self):
         return [[]]
 
-    def enrichBlocks(self):
-        pass
+    def fluctuation_space(self):
+        return df.VectorFunctionSpace(self.mesh, "CG", self.others["polyorder"])
 
-    def createMixedSpace(self):
-        pass
-
-    def flutuationSpace(self):
-        return df.VectorFunctionSpace(self.mesh, "CG",
-                                      self.others['polyorder'])
-
-    def zeroAverageSpace(self):
+    def zero_average_space(self):
         return df.VectorFunctionSpace(self.mesh, "Real", 0)
 
-    def otherSpaces(self):
+    def other_spaces(self):
         return []
 
-    def otherRestrictions(self):
+    def other_restrictions(self):
         return []

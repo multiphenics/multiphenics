@@ -16,8 +16,20 @@
 # along with multiphenics. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import numpy as np
 import dolfin as df
-from multiscale_formulation import MultiscaleFormulation
+from .multiscale_formulation import MultiscaleFormulation
+
+
+class FormulationPeriodic(MultiscaleFormulation):
+
+    def fluctuation_space(self):
+        polyorder = self.others["polyorder"]
+        periodicity = PeriodicBoundary(self.others["x0"], self.others["x1"],
+                                       self.others["y0"], self.others["y1"])
+
+        return df.VectorFunctionSpace(self.mesh, "CG", polyorder,
+                                      constrained_domain=periodicity)
 
 
 class PeriodicBoundary(df.SubDomain):
@@ -33,30 +45,18 @@ class PeriodicBoundary(df.SubDomain):
     def inside(self, x, on_boundary):
         # return True if on left or bottom boundary AND NOT
         # on one of the two corners (0, 1) and (1, 0)
-        if(on_boundary):
+        if on_boundary:
             left, bottom, right, top = self.checkPosition(x)
             return (left and not top) or (bottom and not right)
-
-        return False
+        else:
+            return False
 
     def checkPosition(self, x):
-
-        return [df.near(x[0], self.x0), df.near(x[1], self.y0),
-                df.near(x[0], self.x1), df.near(x[1], self.y1)]
+        return [np.isclose(x[0], self.x0), np.isclose(x[1], self.y0),
+                np.isclose(x[0], self.x1), np.isclose(x[1], self.y1)]
 
     def map(self, x, y):
         left, bottom, right, top = self.checkPosition(x)
 
         y[0] = x[0] + self.x0 - (self.x1 if right else self.x0)
         y[1] = x[1] + self.y0 - (self.y1 if top else self.y0)
-
-
-class FormulationPeriodic(MultiscaleFormulation):
-
-    def flutuationSpace(self):
-        polyorder = self.others['polyorder']
-        periodicity = PeriodicBoundary(self.others['x0'], self.others['x1'],
-                                       self.others['y0'], self.others['y1'])
-
-        return df.VectorFunctionSpace(self.mesh, "CG", polyorder,
-                                      constrained_domain=periodicity)
