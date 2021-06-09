@@ -17,6 +17,7 @@
 #
 
 import os
+import sys
 import importlib
 import pytest
 import matplotlib
@@ -30,7 +31,7 @@ def pytest_collect_file(path, parent):
     if (
         path.ext == ".py" and path.basename not in "conftest.py"
             and
-        "data" not in path.dirname
+        all(exclude not in path.dirname for exclude in ("data", "formulations", "models", "utils"))
     ):
         return TutorialFile.from_parent(parent=parent, fspath=path)
 
@@ -41,7 +42,7 @@ def pytest_pycollect_makemodule(path, parent):
     if (
         path.ext == ".py" and path.basename not in "conftest.py"
             and
-        "data" not in path.dirname
+        all(exclude not in path.dirname for exclude in ("data", "formulations", "models", "utils"))
     ):
         return DoNothingFile.from_parent(parent=parent, fspath=path)
 
@@ -63,6 +64,7 @@ class TutorialItem(pytest.Item):
 
     def runtest(self):
         os.chdir(self.parent.fspath.dirname)
+        sys.path.append(self.parent.fspath.dirname)
         spec = importlib.util.spec_from_file_location(self.name, str(self.parent.fspath))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
