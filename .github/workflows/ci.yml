@@ -66,7 +66,7 @@ jobs:
       - name: Try importing the library inside the docker image
         run: docker run -i --rm ${RELEASE_IMAGE} "python3 -c 'import multiphenics'"
       - name: Run tutorials (serial) to verify that the docker image is working
-        run: docker run -i --rm ${RELEASE_IMAGE} "cd multiphenics && pytest -n auto tutorials"
+        run: docker run -i --rm ${RELEASE_IMAGE} "python3 -c 'import multiphenics' && cd multiphenics && pytest -n auto tutorials"
       - name: Log into the docker registry
         run: docker login -u ${{ secrets.CI_REGISTRY_USER }} -p ${{ secrets.CI_REGISTRY_PASSWORD }}
       - name: Push to the docker registry
