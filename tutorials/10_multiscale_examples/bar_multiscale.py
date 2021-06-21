@@ -45,10 +45,10 @@ from models import MicroConstitutiveModel
 from utils import symgrad, symgrad_voigt
 
 # Geometry definitions
-Lx = 0.5
-Ly = 2.0
-Nx = 3
-Ny = 12
+Lx = 2.0
+Ly = 0.5
+Nx = 12
+Ny = 4
 
 # Create mesh (to be partitioned in parallel) and define function space
 mesh = df.RectangleMesh(MPI.COMM_WORLD, df.Point(0.0, 0.0), df.Point(Lx, Ly),
@@ -194,6 +194,6 @@ for (boundary_model, uh_multiscale) in all_uh_multiscale.items():
 assert np.isclose(error["lin"], error["lag"])
 
 # Compare the errors between single scale and multiscale solutions to reference values
-assert np.isclose(error["per"], 0.0006501)
-assert np.isclose(error["lin"], 0.0005353)
-assert np.isclose(error["MR"], 0.0006657)
+assert np.isclose(error["per"], 0.006319071443377064)
+assert np.isclose(error["lin"], 0.007901978018038507)
+assert np.isclose(error["MR"], 0.0011744201374588351)
