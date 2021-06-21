@@ -69,27 +69,27 @@ ty = -0.01
 traction = df.Constant((0.0, ty))
 
 # Trial and test functions
-uh = ufl.TrialFunction(Uh)
-vh = ufl.TestFunction(Uh)
+uh = df.TrialFunction(Uh)
+vh = df.TestFunction(Uh)
 
 # Define measures
-dx = ufl.dx
-ds = ufl.Measure("ds", domain=mesh, subdomain_data=boundary_markers)
+dx = df.dx
+ds = df.Measure("ds", domain=mesh, subdomain_data=boundary_markers)
 
 # ~~~ PART I: single scale constitutive law ~~~ #
 
 # Define single scale constitutive parameters
-fac_avg = 6.0  # roughly to approximate single scale to mulsticale results
+fac_avg = 4.0  # roughly to approximate single scale to mulsticale results
 lamb = fac_avg * 1.0
 mu = fac_avg * 0.5
 
 # Define single scale constitutive law
 def sigma(u):
-    return lamb * ufl.nabla_div(u) * ufl.Identity(2) + 2 * mu * symgrad(u)
+    return lamb * ufl.nabla_div(u) * df.Identity(2) + 2 * mu * symgrad(u)
 
 # Define single scale variational problem
-a_single_scale = ufl.inner(sigma(uh), ufl.grad(vh)) * dx
-f_single_scale = ufl.inner(traction, vh) * ds(2)
+a_single_scale = df.inner(sigma(uh), df.grad(vh)) * dx
+f_single_scale = df.inner(traction, vh) * ds(2)
 
 # Compute single scale solution
 uh_single_scale = df.Function(Uh)
@@ -165,8 +165,8 @@ for boundary_model in ("per", "lin", "MR", "lag"):
     Chom = ChomExpression(micro_models, degree=0)
 
     # Define multiscale variational problem
-    a_multiscale = ufl.inner(ufl.dot(Chom, symgrad_voigt(uh)), symgrad_voigt(vh)) * dx
-    f_multiscale = ufl.inner(traction, vh) * ds(2)
+    a_multiscale = df.inner(df.dot(Chom, symgrad_voigt(uh)), symgrad_voigt(vh)) * dx
+    f_multiscale = df.inner(traction, vh) * ds(2)
 
     # Compute multiscale solution
     uh_multiscale = df.Function(Uh)
