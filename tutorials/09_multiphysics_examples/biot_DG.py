@@ -18,7 +18,8 @@
 
 from ufl import avg, div, FiniteElement, grad, inner, jump, Measure, sym, VectorElement
 from dolfin import (CellVolume, Constant, dot, FacetArea, FacetNormal, Function, FunctionSpace,
-                    Identity, Mesh, MeshFunction, MPI, parameters, TensorFunctionSpace, XDMFFile)
+                    Identity, Mesh, MeshFunction, MPI, parameters, TensorFunctionSpace, XDMFFile,
+                    VectorFunctionSpace, TestFunction, assemble)
 from multiphenics import (block_assemble, block_assign, BlockDirichletBC, BlockElement, BlockFunction,
                           BlockFunctionSpace, block_solve, block_split, BlockTestFunction,
                           BlockTrialFunction, DirichletBC)
@@ -210,7 +211,7 @@ b = inner(-alpha*p*I, sym(grad(v)))*dx
 c = rho*alpha*div(u)*q*dx
 
 d = (
-    phi*rho*ct*p*q*dx + dt*dot(rho*k/vis*grad(p), grad(q))*dx
+    rho*ct*p*q*dx + dt*dot(rho*k/vis*grad(p), grad(q))*dx
     - dt*dot(avg_w(rho*k/vis*grad(p), weight_e(k, n)), jump(q, n))*dS
     - theta*dt*dot(avg_w(rho*k/vis*grad(q), weight_e(k, n)), jump(p, n))*dS
     + dt*penalty1/h_avg*avg(rho)*k_e(k, n)/avg(vis)*dot(jump(p, n), jump(q, n))*dS
@@ -229,12 +230,25 @@ f_u = (
 
 f_p = (
     rho*alpha*div(u0)*q*dx
-    + phi*rho*ct*p0*q*dx + dt*g*q*dx
+    + rho*ct*p0*q*dx + dt*g*q*dx
     - dt*dot(p_D1*n, rho*k/vis*grad(q))*ds(2)
     + dt*(penalty2/h*rho/vis*dot(dot(n, k), n)*dot(p_D1*n, q*n))*ds(2)
 )
 
 rhs = [f_u, f_p]
+
+# Mass conservation
+V_CON = VectorFunctionSpace(mesh, "CG", 2)
+P_CON = FunctionSpace(mesh, "DG", 1)
+u_con = Function(V_CON)
+p_con = Function(P_CON)
+con = TestFunction(PM)
+mass_con = (rho*alpha*div(u_con-u0)/dt*con*dx
+    + rho*ct*(p_con-p0)/dt*con*dx
+    - dot(avg_w(rho*k/vis*grad(p_con), weight_e(k, n)), jump(con, n))*dS
+    + penalty1/h_avg*avg(rho)*k_e(k, n)/avg(vis)*dot(jump(p_con, n), jump(con, n))*dS
+    - dot(rho*k/vis*grad(p_con), n)*con*ds(2)
+    + penalty2/h*rho/vis*dot(dot(n, k), n)*(p_con-p_D1)*con*ds(2))
 
 if MPI.size(MPI.comm_world) == 1:
     xdmu = XDMFFile("biot_u.xdmf")
@@ -252,7 +266,10 @@ if MPI.size(MPI.comm_world) == 1:
         xdmu.write(w[0], t)
         xdmp.write(w[1], t)
 
-    assert np.isclose(w[0].vector().norm("l2"), 0.021725498)
-    assert np.isclose(w[1].vector().norm("l2"), 12061.84364)
+        u_con.assign(w[0])
+        p_con.assign(w[1])
+        mass = assemble(mass_con)
+        print("average mass residual: ", np.average(np.abs(mass[:])))
+
 else:
     pass  # TODO this tutorial is currently skipped in parallel due to issue #1
