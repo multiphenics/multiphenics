@@ -32,7 +32,7 @@ parameters["ghost_mode"] = "shared_facet" # required by dS
 
 """
 Biot"s equations
-Two-field discontinuous Galerkin,
+Two-field enriched Galerkin,
 Kadeethum T, Nick HM, Lee S, Ballarin F.
 Enriched Galerkin discretization for modeling poroelasticity and permeability alteration in
 heterogeneous porous media. Journal of Computational Physics. 2021 Feb;427:110030.
@@ -107,8 +107,10 @@ boundaries = MeshFunction("size_t", mesh, "data/biot_2mat_facet_region.xml")
 
 # Block function space
 V_element = VectorElement("CG", mesh.ufl_cell(), 2)
-Q_element = FiniteElement("DG", mesh.ufl_cell(), 1)
-W_element = BlockElement(V_element, Q_element)
+Q_element = FiniteElement("CG", mesh.ufl_cell(), 1)
+D_element = FiniteElement("DG", mesh.ufl_cell(), 0)
+EG_element = Q_element + D_element
+W_element = BlockElement(V_element, EG_element)
 W = BlockFunctionSpace(mesh, W_element)
 
 PM = FunctionSpace(mesh, "DG", 0)
@@ -251,8 +253,8 @@ mass_con = (rho*alpha*div(u_con-u0)/dt*con*dx
     + penalty2/h*rho/vis*dot(dot(n, k), n)*(p_con-p_D1)*con*ds(2))
 
 if MPI.size(MPI.comm_world) == 1:
-    xdmu = XDMFFile("biot_u_dg.xdmf")
-    xdmp = XDMFFile("biot_p_dg.xdmf")
+    xdmu = XDMFFile("biot_u_eg.xdmf")
+    xdmp = XDMFFile("biot_p_eg.xdmf")
 
     while t < T:
         t += dt
