@@ -18,7 +18,7 @@
 
 from ufl import avg, div, FiniteElement, grad, inner, jump, Measure, sym, VectorElement
 from dolfin import (CellVolume, Constant, dot, FacetArea, FacetNormal, Function, FunctionSpace,
-                    Identity, Mesh, MeshFunction, parameters, TensorFunctionSpace, XDMFFile)
+                    Identity, Mesh, MeshFunction, MPI, parameters, TensorFunctionSpace, XDMFFile)
 from multiphenics import (block_assemble, block_assign, BlockDirichletBC, BlockElement, BlockFunction,
                           BlockFunctionSpace, block_solve, block_split, BlockTestFunction,
                           BlockTrialFunction, DirichletBC)
@@ -54,13 +54,6 @@ def Ks_cal(alpha, K):
         Ks = K/(1.0-alpha)
     return Ks
 
-def init_scalar_parameter(p, p_value, index, sub):
-    for cell_no in range(len(sub.array())):
-        subdomain_no = sub.array()[cell_no]
-        if subdomain_no == index:
-            p.vector()[cell_no] = p_value
-    p.vector().apply("")
-
 def strain(u):
     return sym(grad(u))
 
@@ -85,20 +78,27 @@ def k_e(k, n):
 def k_har(k):
     return (2*k*k/(k+k))
 
-def init_from_file_parameter_scalar_to_tensor(p, index, sub, filename):
+def init_scalar_parameter(p, p_value, index, sub):
+    local_p = p.vector().get_local()
+    cell_indices = np.where(sub.array() == index)[0]
+    cell_indices = cell_indices[cell_indices < local_p.size]
+    local_p[cell_indices] = p_value
+    p.vector().set_local(local_p)
+    p.vector().apply("insert")
+
+def init_from_file_parameter_scalar_to_tensor(p, filename):
+    local_p = p.vector().get_local()
+    local_range = p.vector().local_range()
     with open(filename) as csvfile:
         readCSV = csv.reader(csvfile, delimiter=",", quoting=csv.QUOTE_NONNUMERIC)
-        i = 0
-        for row in readCSV:
-            p.vector()[i] = math.pow(10, row[0])
-            i += 1
-            p.vector()[i] = 0.
-            i += 1
-            p.vector()[i] = 0.
-            i += 1
-            p.vector()[i] = math.pow(10, row[0])
-            i += 1
-    p.vector().apply("")
+        for (i, row) in enumerate(readCSV):
+            if 4*i >= local_range[0] and 4*i + 3 < local_range[1]:
+                local_p[4*i - local_range[0]] = math.pow(10, row[0])
+                local_p[4*i + 1 - local_range[0]] = 0.
+                local_p[4*i + 2 - local_range[0]] = 0.
+                local_p[4*i + 3 - local_range[0]] = math.pow(10, row[0])
+    p.vector().set_local(local_p)
+    p.vector().apply("insert")
 
 mesh = Mesh("data/biot_2mat.xml")
 subdomains = MeshFunction("size_t", mesh, "data/biot_2mat_physical_region.xml")
@@ -192,7 +192,7 @@ init_scalar_parameter(vis, vis_values[1], 501, subdomains)
 init_scalar_parameter(phi, phi_values[1], 501, subdomains)
 init_scalar_parameter(ct, ct_values[1], 501, subdomains)
 
-init_from_file_parameter_scalar_to_tensor(k, 0., 0., "data/het_0.csv")
+init_from_file_parameter_scalar_to_tensor(k, "data/het_0.csv")
 
 T = 500.0
 t = 0.0
@@ -236,17 +236,23 @@ f_p = (
 
 rhs = [f_u, f_p]
 
-xdmu = XDMFFile("biot_u.xdmf")
-xdmp = XDMFFile("biot_p.xdmf")
+if MPI.size(MPI.comm_world) == 1:
+    xdmu = XDMFFile("biot_u.xdmf")
+    xdmp = XDMFFile("biot_p.xdmf")
 
-while t < T:
-    t += dt
-    print("solving time of: ", t, flush=True)
-    AA = block_assemble(lhs)
-    FF = block_assemble(rhs)
-    bcs.apply(AA)
-    bcs.apply(FF)
-    block_solve(AA, w.block_vector(), FF, "mumps")
-    block_assign(w0, w)
-    xdmu.write(w[0], t)
-    xdmp.write(w[1], t)
+    while t < T:
+        t += dt
+        print("solving at time", t, flush=True)
+        AA = block_assemble(lhs)
+        FF = block_assemble(rhs)
+        bcs.apply(AA)
+        bcs.apply(FF)
+        block_solve(AA, w.block_vector(), FF, "mumps")
+        block_assign(w0, w)
+        xdmu.write(w[0], t)
+        xdmp.write(w[1], t)
+
+    assert np.isclose(w[0].vector().norm("l2"), 0.021725498)
+    assert np.isclose(w[1].vector().norm("l2"), 12061.84364)
+else:
+    pass  # TODO this tutorial is currently skipped in parallel due to issue #1
