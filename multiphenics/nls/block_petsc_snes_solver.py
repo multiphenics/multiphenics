@@ -24,6 +24,8 @@ class BlockPETScSNESSolver(PETScSNESSolver):
         self.problem = problem
 
     def solve(self):
-        PETScSNESSolver.solve(self, self.problem, self.problem.block_solution.block_vector())
+        no_iterations, convergence_flag = PETScSNESSolver.solve(
+            self, self.problem, self.problem.block_solution.block_vector())
         # Keep subfunctions up to date
         self.problem.block_solution.apply("to subfunctions")
+        return no_iterations, convergence_flag
