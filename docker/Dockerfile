@@ -24,7 +24,7 @@ RUN apt-get -qq update && \
     apt-get -qq remove python3-pytest && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    pip3 -q install --upgrade pytest pytest-flake8 pytest-xdist && \
+    pip3 -q install --upgrade "flake8<4" pytest pytest-flake8 pytest-xdist && \
     cat /dev/null > $FENICS_HOME/WELCOME
 
 USER fenics
