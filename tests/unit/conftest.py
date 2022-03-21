@@ -19,7 +19,5 @@
 from dolfin import MPI
 
 def pytest_runtest_teardown(item, nextitem):
-    # Do the normal teardown
-    item.teardown()
     # Add a MPI barrier in parallel
     MPI.barrier(MPI.comm_world)
