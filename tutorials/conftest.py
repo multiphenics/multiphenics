@@ -24,27 +24,27 @@ import matplotlib
 matplotlib.use("agg")
 import matplotlib.pyplot as plt
 
-def pytest_collect_file(path, parent):
+def pytest_collect_file(file_path, path, parent):
     """
     Hook into py.test to collect tutorial files.
     """
     if (
-        path.ext == ".py" and path.basename not in "conftest.py"
+        file_path.suffix == ".py" and file_path.name not in "conftest.py"
             and
-        all(exclude not in path.dirname for exclude in ("data", "formulations", "models", "utils"))
+        all(exclude not in str(file_path.parent) for exclude in ("data", "formulations", "models", "utils"))
     ):
-        return TutorialFile.from_parent(parent=parent, fspath=path)
+        return TutorialFile.from_parent(parent=parent, path=file_path)
 
-def pytest_pycollect_makemodule(path, parent):
+def pytest_pycollect_makemodule(module_path, path, parent):
     """
     Hook into py.test to avoid collecting twice tutorial files explicitly provided on the command lines
     """
     if (
-        path.ext == ".py" and path.basename not in "conftest.py"
+        module_path.suffix == ".py" and module_path.name not in "conftest.py"
             and
-        all(exclude not in path.dirname for exclude in ("data", "formulations", "models", "utils"))
+        all(exclude not in str(module_path.parent) for exclude in ("data", "formulations", "models", "utils"))
     ):
-        return DoNothingFile.from_parent(parent=parent, fspath=path)
+        return DoNothingFile.from_parent(parent=parent, path=module_path)
 
 class TutorialFile(pytest.File):
     """
@@ -52,7 +52,7 @@ class TutorialFile(pytest.File):
     """
 
     def collect(self):
-        yield TutorialItem.from_parent(parent=self, name="run_tutorial -> " + os.path.relpath(str(self.fspath), str(self.parent.fspath)))
+        yield TutorialItem.from_parent(parent=self, name="run_tutorial -> " + os.path.relpath(str(self.path), str(self.parent.path)))
 
 class TutorialItem(pytest.Item):
     """
@@ -63,15 +63,15 @@ class TutorialItem(pytest.Item):
         super(TutorialItem, self).__init__(name, parent)
 
     def runtest(self):
-        os.chdir(self.parent.fspath.dirname)
-        sys.path.append(self.parent.fspath.dirname)
-        spec = importlib.util.spec_from_file_location(self.name, str(self.parent.fspath))
+        os.chdir(self.parent.path.parent)
+        sys.path.append(str(self.parent.path.parent))
+        spec = importlib.util.spec_from_file_location(self.name, str(self.parent.path))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         plt.close('all') # do not trigger matplotlib max_open_warning
 
     def reportinfo(self):
-        return self.fspath, 0, self.name
+        return self.path, 0, self.name
 
 class DoNothingFile(pytest.File):
     """
