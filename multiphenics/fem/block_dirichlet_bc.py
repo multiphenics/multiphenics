@@ -79,7 +79,7 @@ class BlockDirichletBC(BlockDirichletBC_Base):
         # https://stackoverflow.com/questions/2158395/flatten-an-irregular-list-of-lists
         def flatten(l):
             for el in l:
-                if isinstance(el, collections.Iterable):
+                if isinstance(el, collections.abc.Iterable):
                     for sub in flatten(el):
                         yield sub
                 else:
