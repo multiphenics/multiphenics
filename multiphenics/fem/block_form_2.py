@@ -17,10 +17,16 @@
 #
 
 from numpy import empty
-from ufl import Form
-from ufl.algorithms import expand_derivatives
-from ufl.algorithms.analysis import has_exact_type
-from ufl.classes import CoefficientDerivative
+try:
+    from ufl_legacy import Form
+    from ufl_legacy.algorithms import expand_derivatives
+    from ufl_legacy.algorithms.analysis import has_exact_type
+    from ufl_legacy.classes import CoefficientDerivative
+except ImportError:
+    from ufl import Form
+    from ufl.algorithms import expand_derivatives
+    from ufl.algorithms.analysis import has_exact_type
+    from ufl.classes import CoefficientDerivative
 from dolfin.fem.assembling import _create_dolfin_form
 from dolfin.cpp.fem import Form as cpp_Form
 from multiphenics.fem.block_form_1 import BlockForm1

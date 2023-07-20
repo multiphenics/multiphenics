@@ -16,7 +16,10 @@
 # along with multiphenics. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from ufl import avg, div, FiniteElement, grad, inner, jump, Measure, sym, VectorElement
+try:
+    from ufl_legacy import avg, div, FiniteElement, grad, inner, jump, Measure, sym, VectorElement
+except ImportError:
+    from ufl import avg, div, FiniteElement, grad, inner, jump, Measure, sym, VectorElement
 from dolfin import (assemble, CellVolume, Constant, dot, FacetArea, FacetNormal, Function, FunctionSpace,
                     Identity, Mesh, MeshFunction, MPI, parameters, TensorFunctionSpace, TestFunction,
                     VectorFunctionSpace, XDMFFile)

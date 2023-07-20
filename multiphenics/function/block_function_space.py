@@ -18,7 +18,10 @@
 
 import types
 import numpy
-from ufl.finiteelement import FiniteElementBase
+try:
+    from ufl_legacy.finiteelement import FiniteElementBase
+except ImportError:
+    from ufl.finiteelement import FiniteElementBase
 from dolfin import FunctionSpace, Mesh, MeshFunction, SubDomain
 import dolfin.cpp as dolfin_cpp
 from dolfin.cpp.mesh import MeshFunctionBool

@@ -38,7 +38,10 @@ felipe.figueredorocha@epfl.ch
 """
 
 import numpy as np
-import ufl
+try:
+    import ufl_legacy as ufl
+except ImportError:
+    import ufl
 import dolfin as df
 from mpi4py import MPI
 from models import MicroConstitutiveModel

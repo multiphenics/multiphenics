@@ -17,7 +17,10 @@
 #
 
 from numpy import ndarray as array
-from ufl import Form
+try:
+    from ufl_legacy import Form
+except ImportError:
+    from ufl import Form
 from multiphenics.fem.block_flatten_nested import block_flatten_nested
 from multiphenics.fem.block_form_1 import BlockForm1
 from multiphenics.fem.block_form_2 import BlockForm2

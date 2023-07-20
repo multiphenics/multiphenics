@@ -17,7 +17,10 @@
 #
 
 import numpy as np
-import ufl
+try:
+    import ufl_legacy as ufl
+except ImportError:
+    import ufl
 import dolfin as df
 import multiphenics as mp
 from timeit import default_timer as timer

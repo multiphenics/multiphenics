@@ -17,7 +17,10 @@
 #
 
 from numpy import empty
-from ufl import Form
+try:
+    from ufl_legacy import Form
+except ImportError:
+    from ufl import Form
 from dolfin.cpp.fem import Form as cpp_Form
 from dolfin.fem.assembling import _create_dolfin_form
 from multiphenics.fem.block_replace_zero import block_replace_zero, _is_zero

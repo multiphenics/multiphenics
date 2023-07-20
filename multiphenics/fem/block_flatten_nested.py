@@ -17,9 +17,14 @@
 #
 
 from numpy import ndarray as array, zeros
-from ufl import Argument, Form
-from ufl.algorithms.traversal import iter_expressions
-from ufl.corealg.traversal import traverse_unique_terminals
+try:
+    from ufl_legacy import Argument, Form
+    from ufl_legacy.algorithms.traversal import iter_expressions
+    from ufl_legacy.corealg.traversal import traverse_unique_terminals
+except ImportError:
+    from ufl import Argument, Form
+    from ufl.algorithms.traversal import iter_expressions
+    from ufl.corealg.traversal import traverse_unique_terminals
 from multiphenics.fem.block_replace_zero import _get_block_form_rank, _is_zero
 
 def block_flatten_nested(block_form, block_function_space):

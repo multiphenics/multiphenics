@@ -17,7 +17,10 @@
 #
 
 from numpy import isclose
-from ufl import replace
+try:
+    from ufl_legacy import replace
+except ImportError:
+    from ufl import replace
 from dolfin import *
 # import matplotlib.pyplot as plt
 from multiphenics import *

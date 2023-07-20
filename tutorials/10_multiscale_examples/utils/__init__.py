@@ -16,7 +16,10 @@
 # along with multiphenics. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import ufl
+try:
+    import ufl_legacy as ufl
+except ImportError:
+    import ufl
 
 
 def symgrad(v):

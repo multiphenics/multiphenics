@@ -17,7 +17,10 @@
 #
 
 from numpy import ndarray as array, empty
-from ufl import Form
+try:
+    from ufl_legacy import Form
+except ImportError:
+    from ufl import Form
 from dolfin import adjoint
 from multiphenics.fem.block_form import _block_form_preprocessing
 from multiphenics.fem.block_form_2 import BlockForm2
