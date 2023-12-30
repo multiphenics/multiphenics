@@ -16,8 +16,20 @@
 # along with multiphenics. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import gc
 from dolfin import MPI
 
+
+def pytest_runtest_setup(item):
+    # Disable garbage collection
+    gc.disable()
+
+
 def pytest_runtest_teardown(item, nextitem):
+    # Re-enable garbage collection
+    gc.enable()
+    # Run garbage gollection
+    del item
+    gc.collect()
     # Add a MPI barrier in parallel
     MPI.barrier(MPI.comm_world)

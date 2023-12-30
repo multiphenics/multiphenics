@@ -16,30 +16,16 @@
 # along with multiphenics. If not, see <http://www.gnu.org/licenses/>.
 #
 
-FROM quay.io/fenicsproject/dev
+FROM numericalpdes/base_images:fenics
 MAINTAINER Francesco Ballarin <francesco.ballarin@unicatt.it>
 
-USER root
-RUN apt-get -qq update && \
-    apt-get -qq remove python3-pytest && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    pip3 -q install --upgrade flake8 pytest pytest-flake8 pytest-xdist && \
-    cat /dev/null > $FENICS_HOME/WELCOME
+COPY . /tmp/multiphenics
 
-USER fenics
-COPY --chown=fenics . /tmp/multiphenics
+RUN cd /tmp/multiphenics && pip install . && cd && \
+    mkdir -p /root/multiphenics/ && \
+    ln -s /usr/local/lib/python3.*/dist-packages/multiphenics multiphenics/source && \
+    mv /tmp/multiphenics/tests /root/multiphenics/ && \
+    mv /tmp/multiphenics/tutorials /root/multiphenics/ && \
+    rm -rf /tmp/multiphenics
 
-USER root
-WORKDIR /tmp/multiphenics
-RUN python3 setup.py -q install
-
-USER fenics
-WORKDIR $FENICS_HOME
-RUN mkdir multiphenics && \
-    ln -s $FENICS_PREFIX/lib/python3.6/dist-packages/multiphenics*egg/multiphenics multiphenics/source && \
-    mv /tmp/multiphenics/tests multiphenics/ && \
-    mv /tmp/multiphenics/tutorials multiphenics
-
-USER root
-RUN rm -rf /tmp/multiphenics
+WORKDIR /root

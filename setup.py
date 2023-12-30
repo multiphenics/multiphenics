@@ -27,7 +27,7 @@ setup(name="multiphenics",
       license="GNU Library or Lesser General Public License (LGPL)",
       url="http://mathlab.sissa.it/multiphenics",
       classifiers=[
-          "Development Status :: 5 - Production/Stable"
+          "Development Status :: 5 - Production/Stable",
           "Intended Audience :: Developers",
           "Intended Audience :: Science/Research",
           "Programming Language :: Python :: 3",
@@ -35,15 +35,14 @@ setup(name="multiphenics",
           "Programming Language :: Python :: 3.7",
           "Programming Language :: Python :: 3.8",
           "Programming Language :: Python :: 3.9",
+          "Programming Language :: Python :: 3.10",
+          "Programming Language :: Python :: 3.11",
+          "Programming Language :: Python :: 3.12",
           "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
           "Topic :: Scientific/Engineering :: Mathematics",
           "Topic :: Software Development :: Libraries :: Python Modules",
       ],
       packages=find_packages(),
       include_package_data=True,
-      tests_require=[
-          "pytest",
-          "pytest-flake8"
-      ],
       zip_safe=False
       )
