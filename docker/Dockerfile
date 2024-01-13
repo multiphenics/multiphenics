@@ -16,7 +16,7 @@
 # along with multiphenics. If not, see <http://www.gnu.org/licenses/>.
 #
 
-FROM numericalpdes/base_images:fenics
+FROM numericalpdes/base_images:fenics-real
 MAINTAINER Francesco Ballarin <francesco.ballarin@unicatt.it>
 
 COPY . /tmp/multiphenics
